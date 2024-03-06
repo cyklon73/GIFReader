@@ -1,0 +1,68 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+group = 'de.cyklon'
+version = '1.0.0'
+
+var commit = getCommit()
+var release = System.getenv("RELEASE") == "true"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.jetbrains:annotations:24.1.0'
+
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+java {
+
+    withJavadocJar()
+    withSourcesJar()
+}
+
+publishing {
+    repositories {
+        maven {
+            url = "https://maven.mineking.dev/" + (release ? "releases" : "snapshots")
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_SECRET")
+            }
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            groupId = "de.cyklon"
+            artifactId = "GIFReader"
+            version = release ? this.version : commit
+
+            from components.java
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+compileJava {
+    options.compilerArgs << '-parameters'
+}
+
+static String getCommit() {
+    try {
+        var commit = 'git rev-parse --verify --short HEAD'.execute().text.trim()
+        return commit.isEmpty() ? 'unknown' : commit
+    } catch(IOException e) {
+        throw new RuntimeException(e)
+    }
+}
