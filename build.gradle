@@ -29,7 +29,7 @@ java {
 publishing {
     repositories {
         maven {
-            url = "https://maven.mineking.dev/" + (release ? "releases" : "snapshots")
+            url = "https://maven.cyklon.dev/" + (release ? "releases" : "snapshots")
             credentials {
                 username = System.getenv("MAVEN_USERNAME")
                 password = System.getenv("MAVEN_SECRET")
